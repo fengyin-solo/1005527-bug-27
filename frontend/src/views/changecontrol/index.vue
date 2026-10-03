@@ -37,13 +37,20 @@
       <thead>
         <tr>
           <th v-for="column in columns" :key="column">{{ column }}</th>
+          <th>来源待办</th>
           <th>当前状态</th>
           <th>可执行动作</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="String(row.id)">
-          <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+          <td v-for="column in columns" :key="column">{{ row[column] === '' ? '—' : (row[column] ?? '—') }}</td>
+          <td>
+            <span v-if="row['来源模块'] === 'stability'" class="badge todo-tag">
+              稳定性考察 {{ row['来源编号'] }}
+            </span>
+            <span v-else>—</span>
+          </td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
@@ -58,7 +65,7 @@
           </td>
         </tr>
         <tr v-if="!rows.length">
-          <td :colspan="columns.length + 2" class="empty-state">暂无变更控制数据，可先登记变更申请</td>
+          <td :colspan="columns.length + 3" class="empty-state">暂无变更控制数据，可先登记变更申请</td>
         </tr>
       </tbody>
     </table>
