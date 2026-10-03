@@ -43,11 +43,21 @@ export function runAction(key: string, id: number, action: string): ActionResult
   if (current === target) {
     return { ok: false, message: `${meta.entity}已经是「${target}」，不用重复操作` }
   }
-  const lastStatus = meta.statuses[meta.statuses.length - 1]
+  // 状态机守卫：配置了 transitions 的模块只能逐级推进，跳级直接挡回。
+  const allowed = meta.transitions?.[current]
+  if (allowed && !allowed.includes(target)) {
+    return {
+      ok: false,
+      message: `${meta.entity}当前为「${current}」，不能跳到「${target}」，请按状态顺序逐步推进`,
+    }
+  }
+  const terminalStatuses = meta.transitions
+    ? meta.statuses.filter((status) => (meta.transitions?.[status] ?? []).length === 0)
+    : [meta.statuses[meta.statuses.length - 1]]
   const updated: EntryRow = {
     ...rows[index],
     status: target,
-    pending: target !== lastStatus,
+    pending: !terminalStatuses.includes(target),
     abnormal: NEGATIVE_ACTIONS.some((verb) => action.startsWith(verb)),
   }
   const next = [...rows]

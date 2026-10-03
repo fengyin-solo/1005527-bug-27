@@ -18,6 +18,9 @@ export type ModuleMeta = {
   actions: string[]
   actionTargets: Record<string, string>
   metrics: string[]
+  // 状态机：登记每个状态允许迁往的下一状态，未登记的跳级动作一律挡回。
+  // 不配置 transitions 的模块沿用通用的目标态判断。
+  transitions?: Record<string, string[]>
 }
 
 export type PageResult = {
